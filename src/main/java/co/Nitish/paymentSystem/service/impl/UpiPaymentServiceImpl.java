@@ -10,7 +10,9 @@ import co.Nitish.paymentSystem.repository.UpiTransactionRepository;
 import co.Nitish.paymentSystem.service.UpiPaymentService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UpiPaymentServiceImpl implements UpiPaymentService {
@@ -46,13 +48,19 @@ public class UpiPaymentServiceImpl implements UpiPaymentService {
 
         // Step 5: Create & save transaction
         var upiTransaction = UpiTransactionMapper.mapToUpiTransaction(
-                upiPaymentRequestDto, sender, receiver
+                upiPaymentRequestDto, sender
         );
         upiTransactionRepository.save(upiTransaction);
 
         return "Transaction successful from " + sender.getUpiId() +
                 " to " + receiver.getUpiId() +
                 " for amount: " + upiPaymentRequestDto.getAmount();
+    }
+
+    @Override
+    public List<UpiTransactionDto> getAllPaymentList() {
+        List<UpiTransaction> transactions=upiTransactionRepository.findAll();
+        return transactions.stream().map(UpiTransactionMapper::mapToUpiTransactionDto).collect(Collectors.toList());
     }
 
 }

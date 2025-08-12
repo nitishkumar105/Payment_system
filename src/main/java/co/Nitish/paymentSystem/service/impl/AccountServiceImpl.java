@@ -8,6 +8,9 @@ import co.Nitish.paymentSystem.repository.AccountRepository;
 import co.Nitish.paymentSystem.service.AccountService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class AccountServiceImpl implements AccountService {
 
@@ -20,5 +23,11 @@ public class AccountServiceImpl implements AccountService {
         Account account= AccountMapper.AccountDtoToAccount(accountDto);
          Account savedAccount=accountRepository.save(account);
         return AccountMapper.AccountToAccountInfoDto(savedAccount);
+    }
+
+    @Override
+    public List<AccountInfoDto> getAllAccount() {
+         List<Account> accounts=accountRepository.findAll();
+          return accounts.stream().map(AccountMapper::AccountToAccountInfoDto).collect(Collectors.toList());
     }
 }

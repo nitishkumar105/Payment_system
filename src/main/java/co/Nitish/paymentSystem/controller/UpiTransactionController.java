@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/upi")
 public class UpiTransactionController {
@@ -22,4 +24,10 @@ public class UpiTransactionController {
          String result= upiPaymentService.pay(upiPaymentRequestDto);
           return ResponseEntity.status(HttpStatus.CREATED).body(result);
      }
+
+     @GetMapping("/transactionList")
+      public ResponseEntity<List<UpiTransactionDto>> getAllTransaction(){
+           List<UpiTransactionDto> result=upiPaymentService.getAllPaymentList();
+           return ResponseEntity.ok(result);
+      }
 }
