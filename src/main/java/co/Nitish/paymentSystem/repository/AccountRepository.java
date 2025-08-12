@@ -4,6 +4,11 @@ import co.Nitish.paymentSystem.model.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface AccountRepository extends JpaRepository<Account,Long> {
+    Optional<Account> findByUpiId(String UpiId);
+    Optional<Account> findByAccountNumber(String accountNumber);
+    Optional<Account> findByCardNumber(String cardNumber);
 }
