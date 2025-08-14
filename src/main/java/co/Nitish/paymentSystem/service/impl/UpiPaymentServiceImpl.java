@@ -33,9 +33,15 @@ public class UpiPaymentServiceImpl implements UpiPaymentService {
         Account receiver = accountRepository.findByUpiId(upiPaymentRequestDto.getToUpiId())
                 .orElseThrow(() -> new RuntimeException("Receiver account not found"));
 
+
+
         // Step 2: Check balance
         if (sender.getBalance() < upiPaymentRequestDto.getAmount()) {
-            throw new RuntimeException("Insufficient balance in sender's account.");
+            var upiFailedTransaction= UpiTransactionMapper.mapFailedTransaction(
+                    upiPaymentRequestDto, sender,receiver
+            );
+            upiTransactionRepository.save(upiFailedTransaction);
+            return "Transaction Failed: insufficient Balance";
         }
 
         // Step 3: Transfer money
@@ -47,10 +53,10 @@ public class UpiPaymentServiceImpl implements UpiPaymentService {
         accountRepository.save(receiver);
 
         // Step 5: Create & save transaction
-        var upiTransaction = UpiTransactionMapper.mapToUpiTransaction(
-                upiPaymentRequestDto, sender
-        );
-        upiTransactionRepository.save(upiTransaction);
+         var upiDebitTransaction=UpiTransactionMapper.mapDebitTransaction(upiPaymentRequestDto,sender,receiver);
+          var upiCreditTransaction=UpiTransactionMapper.mapCreditTransaction(upiPaymentRequestDto,sender,receiver);
+        upiTransactionRepository.save(upiDebitTransaction);
+        upiTransactionRepository.save(upiCreditTransaction);
 
         return "Transaction successful from " + sender.getUpiId() +
                 " to " + receiver.getUpiId() +

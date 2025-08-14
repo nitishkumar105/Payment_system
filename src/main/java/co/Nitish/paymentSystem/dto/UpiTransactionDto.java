@@ -12,8 +12,7 @@ public class UpiTransactionDto {
     private String  toUpiId;
     private double amount;
     private String remark;
+    private String status;
     private LocalDateTime transactionTime;
 
-    public UpiTransactionDto(Object o, String accountHolderName, String upiId, String upiId1, double amount, String paymentToSwiggy, LocalDateTime now) {
-    }
 }
