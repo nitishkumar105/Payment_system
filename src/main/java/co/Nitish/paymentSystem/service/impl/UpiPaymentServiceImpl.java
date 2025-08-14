@@ -1,5 +1,6 @@
 package co.Nitish.paymentSystem.service.impl;
 
+import co.Nitish.paymentSystem.dto.UpiDebitTransactionDto;
 import co.Nitish.paymentSystem.dto.UpiPaymentRequestDto;
 import co.Nitish.paymentSystem.dto.UpiTransactionDto;
 import co.Nitish.paymentSystem.mapper.UpiTransactionMapper;
@@ -67,6 +68,12 @@ public class UpiPaymentServiceImpl implements UpiPaymentService {
     public List<UpiTransactionDto> getAllPaymentList() {
         List<UpiTransaction> transactions=upiTransactionRepository.findAll();
         return transactions.stream().map(UpiTransactionMapper::mapToUpiTransactionDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UpiDebitTransactionDto> getDebitedTransaction(String upiId) {
+       List<UpiTransaction> debitedTransaction=upiTransactionRepository.findDebitedTransactionsByUpiId(upiId);
+       return debitedTransaction.stream().map(UpiTransactionMapper::mapToDebitDto).collect(Collectors.toList());
     }
 
 }

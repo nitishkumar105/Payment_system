@@ -1,6 +1,7 @@
 package co.Nitish.paymentSystem.mapper;
 
 
+import co.Nitish.paymentSystem.dto.UpiDebitTransactionDto;
 import co.Nitish.paymentSystem.dto.UpiPaymentRequestDto;
 import co.Nitish.paymentSystem.dto.UpiTransactionDto;
 import co.Nitish.paymentSystem.model.Account;
@@ -70,4 +71,14 @@ public class UpiTransactionMapper {
                 LocalDateTime.now()
         );
     }
+    public static UpiDebitTransactionDto mapToDebitDto(UpiTransaction txn) {
+        return new UpiDebitTransactionDto(
+                txn.getToUpiId(),              // receiver UPI
+                txn.getAmount(),
+                txn.getStatus(),
+                txn.getRemark(),
+                txn.getTransactionTime()
+        );
+    }
+
 }
