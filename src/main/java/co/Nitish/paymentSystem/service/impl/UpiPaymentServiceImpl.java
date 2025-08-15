@@ -1,5 +1,6 @@
 package co.Nitish.paymentSystem.service.impl;
 
+import co.Nitish.paymentSystem.customExceptionClass.AccountNotFoundException;
 import co.Nitish.paymentSystem.dto.UpiDebitTransactionDto;
 import co.Nitish.paymentSystem.dto.UpiPaymentRequestDto;
 import co.Nitish.paymentSystem.dto.UpiTransactionDto;
@@ -29,10 +30,10 @@ public class UpiPaymentServiceImpl implements UpiPaymentService {
     public String pay(UpiPaymentRequestDto upiPaymentRequestDto) {
         // Step 1: Find sender and receiver
         Account sender = accountRepository.findByUpiId(upiPaymentRequestDto.getFromUpiId())
-                .orElseThrow(() -> new RuntimeException("Sender account not found"));
+                .orElseThrow(() -> new AccountNotFoundException("Sender account not found"));
 
         Account receiver = accountRepository.findByUpiId(upiPaymentRequestDto.getToUpiId())
-                .orElseThrow(() -> new RuntimeException("Receiver account not found"));
+                .orElseThrow(() -> new AccountNotFoundException("Receiver account not found"));
 
 
 
