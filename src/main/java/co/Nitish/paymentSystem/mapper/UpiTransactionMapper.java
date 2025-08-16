@@ -1,6 +1,7 @@
 package co.Nitish.paymentSystem.mapper;
 
 
+import co.Nitish.paymentSystem.dto.UpiCreditTransactionDto;
 import co.Nitish.paymentSystem.dto.UpiDebitTransactionDto;
 import co.Nitish.paymentSystem.dto.UpiPaymentRequestDto;
 import co.Nitish.paymentSystem.dto.UpiTransactionDto;
@@ -80,5 +81,14 @@ public class UpiTransactionMapper {
                 txn.getTransactionTime()
         );
     }
+     public static UpiCreditTransactionDto mapToCreditDto(UpiTransaction txn){
+         return new UpiCreditTransactionDto(
+                 txn.getFromUpiId(),   //sender upiId
+                 txn.getAmount(),
+                 txn.getStatus(),
+                txn.getRemark(),
+                 txn.getTransactionTime()
+         );
+     }
 
 }

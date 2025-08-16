@@ -1,6 +1,7 @@
 package co.Nitish.paymentSystem.service.impl;
 
 import co.Nitish.paymentSystem.customExceptionClass.AccountNotFoundException;
+import co.Nitish.paymentSystem.dto.UpiCreditTransactionDto;
 import co.Nitish.paymentSystem.dto.UpiDebitTransactionDto;
 import co.Nitish.paymentSystem.dto.UpiPaymentRequestDto;
 import co.Nitish.paymentSystem.dto.UpiTransactionDto;
@@ -75,6 +76,13 @@ public class UpiPaymentServiceImpl implements UpiPaymentService {
     public List<UpiDebitTransactionDto> getDebitedTransaction(String upiId) {
        List<UpiTransaction> debitedTransaction=upiTransactionRepository.findDebitedTransactionsByUpiId(upiId);
        return debitedTransaction.stream().map(UpiTransactionMapper::mapToDebitDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UpiCreditTransactionDto> getCreditedTransaction(String upiId) {
+       return upiTransactionRepository.findCreditTransactionByUpiId(upiId).
+               stream().map(UpiTransactionMapper::mapToCreditDto).
+               collect(Collectors.toList());
     }
 
 }

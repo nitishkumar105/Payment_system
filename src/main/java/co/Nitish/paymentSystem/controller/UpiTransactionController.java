@@ -1,5 +1,6 @@
 package co.Nitish.paymentSystem.controller;
 
+import co.Nitish.paymentSystem.dto.UpiCreditTransactionDto;
 import co.Nitish.paymentSystem.dto.UpiDebitTransactionDto;
 import co.Nitish.paymentSystem.dto.UpiPaymentRequestDto;
 import co.Nitish.paymentSystem.dto.UpiTransactionDto;
@@ -35,5 +36,8 @@ public class UpiTransactionController {
     public ResponseEntity<List<UpiDebitTransactionDto>> getDebitedTransactions(@RequestParam String upiId) {
         return ResponseEntity.ok(upiPaymentService.getDebitedTransaction(upiId));
     }
-
+     @GetMapping("/transaction/credited")
+    public ResponseEntity<List<UpiCreditTransactionDto>> getCreditedTransactions(@RequestParam String upiId){
+          return ResponseEntity.ok(upiPaymentService.getCreditedTransaction(upiId));
+     }
 }

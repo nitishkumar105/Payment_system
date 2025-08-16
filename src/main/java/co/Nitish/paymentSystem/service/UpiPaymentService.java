@@ -1,5 +1,6 @@
 package co.Nitish.paymentSystem.service;
 
+import co.Nitish.paymentSystem.dto.UpiCreditTransactionDto;
 import co.Nitish.paymentSystem.dto.UpiDebitTransactionDto;
 import co.Nitish.paymentSystem.dto.UpiPaymentRequestDto;
 import co.Nitish.paymentSystem.dto.UpiTransactionDto;
@@ -12,4 +13,5 @@ public interface UpiPaymentService {
       String pay(UpiPaymentRequestDto upiPaymentRequestDto);
       List<UpiTransactionDto> getAllPaymentList();
       List<UpiDebitTransactionDto> getDebitedTransaction(String upiId);
+      List<UpiCreditTransactionDto> getCreditedTransaction(String upiId);
 }

@@ -12,4 +12,6 @@ import java.util.List;
 public interface UpiTransactionRepository extends JpaRepository<UpiTransaction,Long> {
     @Query("SELECT u FROM UpiTransaction u WHERE u.fromUpiId = :upiId AND u.status = 'DEBITED'")
     List<UpiTransaction> findDebitedTransactionsByUpiId(@Param("upiId") String upiId);
+    @Query("SELECT u FROM UpiTransaction u WHERE u.toUpiId = :upiId AND u.status = 'CREDITED'")
+    List<UpiTransaction>findCreditTransactionByUpiId(@Param("upiId") String upiId);
 }
