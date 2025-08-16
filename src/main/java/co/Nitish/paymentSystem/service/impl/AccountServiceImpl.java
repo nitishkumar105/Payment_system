@@ -1,5 +1,6 @@
 package co.Nitish.paymentSystem.service.impl;
 
+import co.Nitish.paymentSystem.customExceptionClass.AccountNotFoundException;
 import co.Nitish.paymentSystem.dto.AccountDto;
 import co.Nitish.paymentSystem.dto.AccountInfoDto;
 import co.Nitish.paymentSystem.mapper.AccountMapper;
@@ -29,5 +30,11 @@ public class AccountServiceImpl implements AccountService {
     public List<AccountInfoDto> getAllAccount() {
          List<Account> accounts=accountRepository.findAll();
           return accounts.stream().map(AccountMapper::AccountToAccountInfoDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public AccountInfoDto getAccountByAccountNumber(String accountNumber) {
+       Account account=accountRepository.findByAccountNumber(accountNumber).orElseThrow(()-> new AccountNotFoundException("account not found"));
+        return  AccountMapper.AccountToAccountInfoDto(account);
     }
 }

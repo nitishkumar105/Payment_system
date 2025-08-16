@@ -11,4 +11,5 @@ public interface AccountService {
 
     AccountInfoDto createAccount(AccountDto accountDto) ;
       List<AccountInfoDto> getAllAccount();
+      AccountInfoDto getAccountByAccountNumber(String accountNumber);
 }

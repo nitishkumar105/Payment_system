@@ -18,7 +18,10 @@ public class AccountController {
      AccountController(AccountService accountService){
           this.accountService=accountService;
      }
-
+      @GetMapping
+      public String hello(){
+          return "Hello I'm default Rest api to account";
+      }
      @PostMapping("/create")
       public ResponseEntity<AccountInfoDto> createAccount(@RequestBody AccountDto accountDto){
              AccountInfoDto accountInfoDto=accountService.createAccount(accountDto);
@@ -30,4 +33,8 @@ public class AccountController {
              List<AccountInfoDto> accountInfoDtoList=accountService.getAllAccount();
              return ResponseEntity.ok(accountInfoDtoList);
        }
+        @GetMapping("/getAccount")
+        public ResponseEntity<AccountInfoDto> getAccountByAccountNumber(@RequestParam String accountNumber ){
+           return ResponseEntity.ok(accountService.getAccountByAccountNumber(accountNumber));
+        }
 }
