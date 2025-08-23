@@ -26,6 +26,7 @@ public class Account {
     private String cardNumber;
     private String cardExpiry;
     private String cardCvv;
+    private String email;
 
 
 

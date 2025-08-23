@@ -25,8 +25,8 @@ public class User {
     @Column(nullable = false)
     private String roles; // e.g. "ADMIN" or "USER"
     // Link to Account (One-to-One relationship)
-    @OneToOne
-    @JoinColumn(name = "account_id")
+    @OneToMany
+    @JoinColumn(name = "account_Id")
     private Account account;
 
     private boolean enabled = true;

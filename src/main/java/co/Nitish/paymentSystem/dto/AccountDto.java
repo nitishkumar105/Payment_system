@@ -14,4 +14,5 @@ public class AccountDto {
     private String cardNumber;
     private String cardExpiry;
     private String cardCvv;
+    private String email;
 }
