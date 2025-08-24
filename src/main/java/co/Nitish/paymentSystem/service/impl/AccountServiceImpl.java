@@ -49,14 +49,37 @@ public class AccountServiceImpl implements AccountService {
             // Generate PDF
             String pdfPath = pdfService.generateAccountPdf(account, userEmail);
 
+            // Mask account number (show only last 4 digits)
+            String maskedAccountNumber = "****-****-****-" +
+                    account.getAccountNumber().substring(account.getAccountNumber().length() - 4);
+
+            // Mask balance (show as asterisks)
+            String maskedBalance = "********";
+
+            // Prepare UPI information
+            String upiInfo = account.getUpiId() != null ?
+                    "• UPI ID: " + account.getUpiId() + "\n" :
+                    "• UPI ID: Not configured yet\n";
+
             // Send email with PDF attachment
             String subject = "Welcome to Payment System - Account Created Successfully";
             String text = "Dear " + account.getAccountHolderName() + ",\n\n" +
-                    "Your account has been successfully created.\n" +
-                    "Account Number: " + account.getAccountNumber() + "\n" +
-                    "Initial Balance: ₹" + account.getBalance() + "\n\n" +
-                    "Please find your account details attached.\n\n" +
-                    "Best regards,\nPayment System Team";
+                    "Your account has been successfully created with the following details:\n\n" +
+                    "Account Overview:\n" +
+                    "• Account Holder: " + account.getAccountHolderName() + "\n" +
+                    "• Account Number: " + maskedAccountNumber + "\n" +
+                    "• Account Balance: " + maskedBalance + "\n" +
+                    upiInfo +
+                    "\n" +
+                    "For security reasons, sensitive information has been masked in this email.\n" +
+                    "Please find your complete account details in the attached PDF document.\n\n" +
+                    "Important:\n" +
+                    "• Keep your account details secure\n" +
+                    "• Do not share your PDF statement with anyone\n" +
+                    "• Use your UPI ID for quick payments\n\n" +
+                    "⚠️  This is an auto-generated email. Please do not reply to this message.\n\n" +
+                    "Best regards,\nCo.Nitish Payment System Team\n" +
+                    "Security First | Privacy Protected";
 
             emailService.sendEmailWithAttachment(userEmail, subject, text, pdfPath);
 
@@ -66,21 +89,32 @@ public class AccountServiceImpl implements AccountService {
         } catch (Exception e) {
             // Log the error but don't fail the account creation
             System.err.println("Failed to send email: " + e.getMessage());
+            // You might want to add proper logging here
         }
     }
 
     private void sendHtmlWelcomeEmail(Account account, String userEmail) {
-        Context context = new Context();
-        context.setVariable("accountHolderName", account.getAccountHolderName());
-        context.setVariable("accountNumber", account.getAccountNumber());
-        context.setVariable("balance", account.getBalance());
-        context.setVariable("upiId", account.getUpiId());
+        try {
+            String maskedAccountNumber = "****-****-****-" +
+                    account.getAccountNumber().substring(account.getAccountNumber().length() - 4);
 
-        emailService.sendHtmlEmail(userEmail,
-                "Welcome to Our Payment System",
-                "welcome-email-template",
-                context
-        );
+            String upiInfo = account.getUpiId() != null ?
+                    "<li><strong>UPI ID:</strong> " + account.getUpiId() + "</li>" :
+                    "<li><strong>UPI ID:</strong> Not configured yet</li>";
+
+            Context context = new Context();
+            context.setVariable("accountHolderName", account.getAccountHolderName());
+            context.setVariable("maskedAccountNumber", maskedAccountNumber);
+            context.setVariable("upiInfo", upiInfo);
+
+            emailService.sendHtmlEmail(userEmail,
+                    "Welcome to Our Payment System",
+                    "welcome-email-template",
+                    context
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to send HTML email: " + e.getMessage());
+        }
     }
 
     @Override

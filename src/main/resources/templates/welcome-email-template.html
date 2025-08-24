@@ -8,7 +8,8 @@
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background: #007bff; color: white; padding: 20px; text-align: center; }
         .content { background: #f9f9f9; padding: 20px; }
-        .footer { background: #333; color: white; padding: 10px; text-align: center; }
+        .footer { background: #333; color: white; padding: 10px; text-align: center; font-size: 12px; }
+        .security-note { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 15px 0; }
     </style>
 </head>
 <body>
@@ -21,32 +22,31 @@
         <h2>Hello, <span th:text="${accountHolderName}"></span>!</h2>
         <p>Your account has been successfully created with the following details:</p>
 
-        <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-            <tr>
-                <th>Account Holder</th>
-                <td th:text="${accountHolderName}"></td>
-            </tr>
-            <tr>
-                <th>Account Number</th>
-                <td th:text="${accountNumber}"></td>
-            </tr>
-            <tr>
-                <th>Balance</th>
-                <td>₹<span th:text="${balance}"></span></td>
-            </tr>
-            <tr th:if="${upiId}">
-                <th>UPI ID</th>
-                <td th:text="${upiId}"></td>
-            </tr>
-        </table>
+        <div class="security-note">
+            <strong>Security Note:</strong> Sensitive information is masked for your protection.
+            Complete details are available in your attached PDF statement.
+        </div>
 
-        <p style="margin-top: 20px;">
-            <strong>Important:</strong> Please keep your account details secure and do not share them with anyone.
-        </p>
+        <h3>Account Overview:</h3>
+        <ul>
+            <li><strong>Account Holder:</strong> <span th:text="${accountHolderName}"></span></li>
+            <li><strong>Account Number:</strong> <span th:text="${maskedAccountNumber}"></span></li>
+            <li><strong>Account Balance:</strong> ********</li>
+            <li th:utext="${upiInfo}"></li>
+        </ul>
+
+        <h3>Important Information:</h3>
+        <ul>
+            <li>Keep your account details secure</li>
+            <li>Do not share your PDF statement with anyone</li>
+            <li>Use your UPI ID for quick and secure payments</li>
+            <li>This is an auto-generated email - please do not reply</li>
+        </ul>
     </div>
 
     <div class="footer">
-        <p>© 2024 Payment System. All rights reserved.</p>
+        <p>© 2024 Co.Nitish Payment System. All rights reserved.</p>
+        <p>Security First | Privacy Protected | Auto-Generated Email</p>
     </div>
 </div>
 </body>
