@@ -14,7 +14,8 @@ public class AccountMapper {
                  accountDto.getUpiId(),
                  accountDto.getCardNumber(),
                  accountDto.getCardExpiry(),
-                 accountDto.getCardCvv()
+                 accountDto.getCardCvv(),
+                 accountDto.getEmail()
          );
     }
      public static AccountInfoDto AccountToAccountInfoDto(Account account){
