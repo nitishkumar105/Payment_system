@@ -1,68 +1,55 @@
 package co.Nitish.paymentSystem.service;
 
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
-
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import java.io.File;
 
 @Service
 public class EmailService {
 
     private final JavaMailSender mailSender;
-    private final TemplateEngine templateEngine;
 
-    public EmailService(JavaMailSender mailSender, TemplateEngine templateEngine) {
+    public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
-        this.templateEngine = templateEngine;
     }
 
-    public void sendSimpleEmail(String to, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
-        mailSender.send(message);
-    }
-
-    public void sendEmailWithAttachment(String to, String subject, String text, String attachmentPath) {
+    public void sendSimpleEmail(String toEmail, String subject, String body) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(text);
-
-            FileSystemResource file = new FileSystemResource(new File(attachmentPath));
-            helper.addAttachment("Account_Details.pdf", file);
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("nitishkumaryadav105@gmail.com");  // Explicit from address
+            message.setTo(toEmail);
+            message.setSubject(subject);
+            message.setText(body);
 
             mailSender.send(message);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email with attachment", e);
+            System.out.println("✅ Email sent successfully to: " + toEmail);
+
+        } catch (Exception e) {
+            System.err.println("❌ Failed to send email to " + toEmail + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    public void sendHtmlEmail(String to, String subject, String templateName, Context context) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+    public void sendAccountCreationEmail(String toEmail, String accountHolderName,
+                                         String accountNumber, String upiId,
+                                         String maskedCardNumber, String cardExpiry) {
+        String subject = "Welcome to NITISH CORPORATION Bank - Account Created Successfully";
+        String body = "Dear " + accountHolderName + ",\n\n" +
+                "Your bank account has been successfully created with the following details:\n\n" +
+                "Account Details:\n" +
+                "• Account Holder: " + accountHolderName + "\n" +
+                "• Account Number: " + accountNumber + "\n" +
+                "• UPI ID: " + upiId + "\n" +
+                "• Card Number: " + maskedCardNumber + "\n" +
+                "• Card Expiry: " + cardExpiry + "\n" +
+                "• Initial Balance: ₹0.00\n\n" +
+                "Security Information:\n" +
+                "• Your account number is automatically generated and unique\n" +
+                "• UPI ID is created from your phone number\n" +
+                "• Debit card details are auto-generated\n" +
+                "• Initial balance is ₹0.00 - you can add funds anytime\n\n" +
+                "Best regards,\nNK Bank Team";
 
-            String htmlContent = templateEngine.process(templateName, context);
-
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send HTML email", e);
-        }
+        sendSimpleEmail(toEmail, subject, body);
     }
 }

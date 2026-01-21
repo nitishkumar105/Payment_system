@@ -1,6 +1,5 @@
 package co.Nitish.paymentSystem.controller;
 
-
 import co.Nitish.paymentSystem.dto.AccountDto;
 import co.Nitish.paymentSystem.dto.AccountInfoDto;
 import co.Nitish.paymentSystem.service.AccountService;
@@ -14,27 +13,41 @@ import java.util.List;
 @RequestMapping("api/account")
 public class AccountController {
 
-     public final AccountService accountService;
-     AccountController(AccountService accountService){
-          this.accountService=accountService;
-     }
-      @GetMapping
-      public String hello(){
-          return "Hello I'm default Rest api to account";
-      }
-     @PostMapping("/create")
-      public ResponseEntity<AccountInfoDto> createAccount(@RequestBody AccountDto accountDto){
-             AccountInfoDto accountInfoDto=accountService.createAccount(accountDto);
-            return   ResponseEntity.status(HttpStatus.CREATED).body(accountInfoDto);
+    public final AccountService accountService;
 
-      }
-        @GetMapping("/getAllAccount")
-       public ResponseEntity<List<AccountInfoDto>> getAllAccount(){
-             List<AccountInfoDto> accountInfoDtoList=accountService.getAllAccount();
-             return ResponseEntity.ok(accountInfoDtoList);
-       }
-        @GetMapping("/getAccount")
-        public ResponseEntity<AccountInfoDto> getAccountByAccountNumber(@RequestParam String accountNumber ){
-           return ResponseEntity.ok(accountService.getAccountByAccountNumber(accountNumber));
-        }
+    AccountController(AccountService accountService){
+        this.accountService=accountService;
+    }
+
+    @GetMapping
+    public String hello(){
+        return "Hello I'm default Rest api to account";
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<AccountInfoDto> createAccount(@RequestBody AccountDto accountDto){
+        AccountInfoDto accountInfoDto=accountService.createAccount(accountDto);
+        return   ResponseEntity.status(HttpStatus.CREATED).body(accountInfoDto);
+    }
+
+    @GetMapping("/getAllAccount")
+    public ResponseEntity<List<AccountInfoDto>> getAllAccount(){
+        List<AccountInfoDto> accountInfoDtoList=accountService.getAllAccount();
+        return ResponseEntity.ok(accountInfoDtoList);
+    }
+
+    @GetMapping("/getAccount")
+    public ResponseEntity<AccountInfoDto> getAccountByAccountNumber(@RequestParam String accountNumber){
+        return ResponseEntity.ok(accountService.getAccountByAccountNumber(accountNumber));
+    }
+
+    @GetMapping("/getAccount/by-phone")
+    public ResponseEntity<AccountInfoDto> getAccountByPhoneNumber(@RequestParam String phoneNumber){
+        return ResponseEntity.ok(accountService.getAccountByPhoneNumber(phoneNumber));
+    }
+
+    @GetMapping("/getAccount/by-upi")
+    public ResponseEntity<AccountInfoDto> getAccountByUpiId(@RequestParam String upiId){
+        return ResponseEntity.ok(accountService.getAccountByUpiId(upiId));
+    }
 }
