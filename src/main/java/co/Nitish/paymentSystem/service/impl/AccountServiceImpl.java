@@ -8,6 +8,7 @@ import co.Nitish.paymentSystem.model.Account;
 import co.Nitish.paymentSystem.repository.AccountRepository;
 import co.Nitish.paymentSystem.service.AccountService;
 import co.Nitish.paymentSystem.service.EmailService;
+import co.Nitish.paymentSystem.service.PdfService;
 import co.Nitish.paymentSystem.util.AccountNumberGenerator;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -22,13 +23,16 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final EmailService emailService;
+    private final PdfService pdfService;
     private final AccountNumberGenerator accountNumberGenerator;
 
     public AccountServiceImpl(AccountRepository accountRepository,
                               EmailService emailService,
+                              PdfService pdfService,
                               AccountNumberGenerator accountNumberGenerator) {
         this.accountRepository = accountRepository;
         this.emailService = emailService;
+        this.pdfService = pdfService;
         this.accountNumberGenerator = accountNumberGenerator;
     }
 
@@ -46,7 +50,6 @@ public class AccountServiceImpl implements AccountService {
         if (existingByEmail.isPresent()) {
             throw new RuntimeException("Account with email " + accountDto.getEmail() + " already exists");
         }
-
         // Create account entity
         Account account = new Account();
         account.setAccountHolderName(accountDto.getAccountHolderName());
@@ -54,9 +57,8 @@ public class AccountServiceImpl implements AccountService {
         account.setEmail(accountDto.getEmail());
 
         // Auto-generate all fields
-       //  account.setAccountNumber(generateUniqueAccountNumber());
-        account.setAccountNumber(accountNumberGenerator.generateAccountNumber());
-        account.setBalance(0.0); // Default balance is 0
+        account.setAccountNumber(generateUniqueAccountNumber());
+        account.setBalance(0.0);
         account.setUpiId(accountNumberGenerator.generateUpiId(accountDto.getPhoneNumber()));
         account.setCardNumber(accountNumberGenerator.generateCardNumber());
         account.setCardExpiry(accountNumberGenerator.generateCardExpiry());
@@ -65,10 +67,40 @@ public class AccountServiceImpl implements AccountService {
         // Save account
         Account savedAccount = accountRepository.save(account);
 
-        // Send email asynchronously
-        sendAccountCreationEmailAsync(savedAccount);
+        // Generate PDF and send email
+        sendAccountCreationEmailWithPdf(savedAccount);
 
         return AccountMapper.AccountToAccountInfoDto(savedAccount);
+    }
+
+    @Async
+    public void sendAccountCreationEmailWithPdf(Account account) {
+        try {
+            // Generate PDF statement
+            String pdfPath = pdfService.generateAccountStatementPdf(account);
+
+            // Prepare masked card number
+            String maskedCardNumber = "**** **** **** " +
+                    account.getCardNumber().replaceAll("\\s+", "").substring(12);
+
+            // Send HTML email with PDF attachment
+            emailService.sendAccountCreationEmailWithPdf(
+                    account.getEmail(),
+                    account.getAccountHolderName(),
+                    account.getAccountNumber(),
+                    account.getUpiId(),
+                    maskedCardNumber,
+                    account.getCardExpiry(),
+                    pdfPath
+            );
+
+            System.out.println("Account creation email with PDF sent successfully");
+
+        } catch (Exception e) {
+            System.err.println(" Failed to send account creation email: " + e.getMessage());
+            e.printStackTrace();
+            // Don't throw - this is async method
+        }
     }
 
     private String generateUniqueAccountNumber() {
@@ -86,27 +118,6 @@ public class AccountServiceImpl implements AccountService {
         } while (accountRepository.existsByAccountNumber(accountNumber));
 
         return accountNumber;
-    }
-
-
-    @Async
-    public void sendAccountCreationEmailAsync(Account account) {
-        try {
-            String maskedCardNumber = maskCardNumber(account.getCardNumber());
-
-            emailService.sendAccountCreationEmail(
-                    account.getEmail(),
-                    account.getAccountHolderName(),
-                    account.getAccountNumber(),
-                    account.getUpiId(),
-                    maskedCardNumber,
-                    account.getCardExpiry()
-            );
-
-        } catch (Exception e) {
-            System.err.println("Failed to send account creation email: " + e.getMessage());
-            // Don't throw - this is async method
-        }
     }
 
     private String maskAccountNumber(String accountNumber) {

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Created - NK Bank</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #2980b9, #2c3e50);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .welcome-section {
+            background-color: #e8f4fc;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+        .welcome-section h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .account-details {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            flex: 1;
+        }
+        .detail-value {
+            color: #212529;
+            flex: 2;
+            text-align: right;
+        }
+        .highlight {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+        .security-note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 25px 0;
+            border-radius: 5px;
+        }
+        .security-note h3 {
+            color: #856404;
+            margin-top: 0;
+        }
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .attachment-note {
+            background-color: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            padding: 15px;
+            text-align: center;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            margin: 10px 5px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+            }
+            .content {
+                padding: 20px;
+            }
+            .detail-row {
+                flex-direction: column;
+            }
+            .detail-value {
+                text-align: left;
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Welcome to NITISH CORPORATION </h1>
+        <p>Your financial journey begins here</p>
+    </div>
+
+    <div class="content">
+        <div class="welcome-section">
+            <h2>Hello, <span th:text="${accountHolderName}">Customer</span>!</h2>
+            <p>We're delighted to inform you that your bank account has been successfully created.
+                Welcome to the NITISH CORPORATION family!</p>
+        </div>
+
+        <div class="account-details">
+            <h3 style="color: #2c3e50; margin-top: 0;">Account Details</h3>
+            <div class="detail-row">
+                <span class="detail-label">Account Holder:</span>
+                <span class="detail-value" th:text="${accountHolderName}">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Account Number:</span>
+                <span class="detail-value" th:text="${maskedAccountNumber}">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">UPI ID:</span>
+                <span class="detail-value" th:text="${upiId}">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Card Number:</span>
+                <span class="detail-value" th:text="${maskedCardNumber}">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Card Expiry:</span>
+                <span class="detail-value" th:text="${cardExpiry}">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Account Status:</span>
+                <span class="detail-value" style="color: #28a745; font-weight: 600;">ACTIVE</span>
+            </div>
+        </div>
+
+        <div class="highlight">
+            💳 Your debit card details are attached in the PDF statement. Please keep them secure.
+        </div>
+
+        <div class="attachment-note">
+            <h3>📎 Document Attached</h3>
+            <p>Your complete account statement is attached as a PDF document.</p>
+            <p><strong>File Name:</strong> Account_Statement_<span th:text="${accountNumber}">XXX</span>.pdf</p>
+        </div>
+
+        <div style="text-align: center; margin: 25px 0;">
+            <a href="#" class="button">Download Mobile App</a>
+            <a href="#" class="button" style="background: linear-gradient(135deg, #27ae60, #219653);">Internet Banking</a>
+        </div>
+
+        <div class="security-note">
+            <h3>🔒 Security First</h3>
+            <ul>
+                <li>Never share your login credentials, OTP, or CVV</li>
+                <li>Enable two-factor authentication for added security</li>
+                <li>Regularly update your passwords</li>
+                <li>Report suspicious activity immediately</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; color: #6c757d; font-size: 14px; margin-top: 30px;">
+            <p>Need help? Contact our 24/7 customer support:</p>
+            <p>📞 9508102692 | ✉️ nitishkumaryadav105@gmail.com</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© <span th:text="${currentYear}">2026</span> NITISH CORPORATION Ltd. All rights reserved.</p>
+        <p>Registered Office: Delhi, India | RBI Registration No: B-12345</p>
+        <p>
+            <a href="#">Privacy Policy</a> |
+            <a href="#">Terms of Service</a> |
+            <a href="#">Security Tips</a>
+        </p>
+        <p style="opacity: 0.7; margin-top: 10px;">
+            This is an auto-generated email. Please do not reply.
+        </p>
+    </div>
+</div>
+</body>
+</html>
