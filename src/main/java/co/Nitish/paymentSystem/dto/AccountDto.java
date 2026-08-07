@@ -1,18 +1,18 @@
 package co.Nitish.paymentSystem.dto;
 
-import lombok.*;
+import lombok.Data;
 
 @Data
-@NoArgsConstructor@AllArgsConstructor@Getter@Setter
 public class AccountDto {
-     private String accountHolderName;
-     private String accountNumber;
-     private double amount;
-
-     // card and upiId details
-    private String upiId;
-    private String cardNumber;
-    private String cardExpiry;
-    private String cardCvv;
+    private String accountHolderName;
+    private String phoneNumber;
     private String email;
+
+    // These fields will be auto-generated, so no need in DTO
+    // private String accountNumber;  // Auto-generated
+    // private double balance;        // Will be 0.0
+    // private String upiId;         // Auto-generated from phone
+    // private String cardNumber;    // Auto-generated
+    // private String cardExpiry;    // Auto-generated
+    // private String cardCvv;       // Auto-generated
 }

@@ -9,11 +9,13 @@ import co.Nitish.paymentSystem.repository.AccountRepository;
 import co.Nitish.paymentSystem.service.AccountService;
 import co.Nitish.paymentSystem.service.EmailService;
 import co.Nitish.paymentSystem.service.PdfService;
+import co.Nitish.paymentSystem.util.AccountNumberGenerator;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.context.Context;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,99 +24,114 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final EmailService emailService;
     private final PdfService pdfService;
+    private final AccountNumberGenerator accountNumberGenerator;
 
     public AccountServiceImpl(AccountRepository accountRepository,
                               EmailService emailService,
-                              PdfService pdfService) {
+                              PdfService pdfService,
+                              AccountNumberGenerator accountNumberGenerator) {
         this.accountRepository = accountRepository;
         this.emailService = emailService;
         this.pdfService = pdfService;
+        this.accountNumberGenerator = accountNumberGenerator;
     }
 
     @Override
+    @Transactional
     public AccountInfoDto createAccount(AccountDto accountDto) {
-        Account account = AccountMapper.AccountDtoToAccount(accountDto);
+        // Check if phone number already exists
+        Optional<Account> existingByPhone = accountRepository.findByPhoneNumber(accountDto.getPhoneNumber());
+        if (existingByPhone.isPresent()) {
+            throw new RuntimeException("Account with phone number " + accountDto.getPhoneNumber() + " already exists");
+        }
+
+        // Check if email already exists
+        Optional<Account> existingByEmail = accountRepository.findByEmail(accountDto.getEmail());
+        if (existingByEmail.isPresent()) {
+            throw new RuntimeException("Account with email " + accountDto.getEmail() + " already exists");
+        }
+        // Create account entity
+        Account account = new Account();
+        account.setAccountHolderName(accountDto.getAccountHolderName());
+        account.setPhoneNumber(accountDto.getPhoneNumber());
+        account.setEmail(accountDto.getEmail());
+
+        // Auto-generate all fields
+        account.setAccountNumber(generateUniqueAccountNumber());
+        account.setBalance(0.0);
+        account.setUpiId(accountNumberGenerator.generateUpiId(accountDto.getPhoneNumber()));
+        account.setCardNumber(accountNumberGenerator.generateCardNumber());
+        account.setCardExpiry(accountNumberGenerator.generateCardExpiry());
+        account.setCardCvv(accountNumberGenerator.generateCvv());
+
+        // Save account
         Account savedAccount = accountRepository.save(account);
 
-        // Send email asynchronously
-        String userEmail=accountDto.getEmail();
-        sendAccountCreationEmail(savedAccount, userEmail); // Replace with actual email from DTO
+        // Generate PDF and send email
+        sendAccountCreationEmailWithPdf(savedAccount);
 
         return AccountMapper.AccountToAccountInfoDto(savedAccount);
     }
 
     @Async
-    public void sendAccountCreationEmail(Account account, String userEmail) {
+    public void sendAccountCreationEmailWithPdf(Account account) {
         try {
-            // Generate PDF
-            String pdfPath = pdfService.generateAccountPdf(account, userEmail);
+            // Generate PDF statement
+            String pdfPath = pdfService.generateAccountStatementPdf(account);
 
-            // Mask account number (show only last 4 digits)
-            String maskedAccountNumber = "****-****-****-" +
-                    account.getAccountNumber().substring(account.getAccountNumber().length() - 4);
+            // Prepare masked card number
+            String maskedCardNumber = "**** **** **** " +
+                    account.getCardNumber().replaceAll("\\s+", "").substring(12);
 
-            // Mask balance (show as asterisks)
-            String maskedBalance = "********";
+            // Send HTML email with PDF attachment
+            emailService.sendAccountCreationEmailWithPdf(
+                    account.getEmail(),
+                    account.getAccountHolderName(),
+                    account.getAccountNumber(),
+                    account.getUpiId(),
+                    maskedCardNumber,
+                    account.getCardExpiry(),
+                    pdfPath
+            );
 
-            // Prepare UPI information
-            String upiInfo = account.getUpiId() != null ?
-                    "• UPI ID: " + account.getUpiId() + "\n" :
-                    "• UPI ID: Not configured yet\n";
-
-            // Send email with PDF attachment
-            String subject = "Welcome to Payment System - Account Created Successfully";
-            String text = "Dear " + account.getAccountHolderName() + ",\n\n" +
-                    "Your account has been successfully created with the following details:\n\n" +
-                    "Account Overview:\n" +
-                    "• Account Holder: " + account.getAccountHolderName() + "\n" +
-                    "• Account Number: " + maskedAccountNumber + "\n" +
-                    "• Account Balance: " + maskedBalance + "\n" +
-                    upiInfo +
-                    "\n" +
-                    "For security reasons, sensitive information has been masked in this email.\n" +
-                    "Please find your complete account details in the attached PDF document.\n\n" +
-                    "Important:\n" +
-                    "• Keep your account details secure\n" +
-                    "• Do not share your PDF statement with anyone\n" +
-                    "• Use your UPI ID for quick payments\n\n" +
-                    "⚠️  This is an auto-generated email. Please do not reply to this message.\n\n" +
-                    "Best regards,\nCo.Nitish Payment System Team\n" +
-                    "Security First | Privacy Protected";
-
-            emailService.sendEmailWithAttachment(userEmail, subject, text, pdfPath);
-
-            // Optional: Send HTML email without attachment
-            sendHtmlWelcomeEmail(account, userEmail);
+            System.out.println("Account creation email with PDF sent successfully");
 
         } catch (Exception e) {
-            // Log the error but don't fail the account creation
-            System.err.println("Failed to send email: " + e.getMessage());
-            // You might want to add proper logging here
+            System.err.println(" Failed to send account creation email: " + e.getMessage());
+            e.printStackTrace();
+            // Don't throw - this is async method
         }
     }
 
-    private void sendHtmlWelcomeEmail(Account account, String userEmail) {
-        try {
-            String maskedAccountNumber = "****-****-****-" +
-                    account.getAccountNumber().substring(account.getAccountNumber().length() - 4);
+    private String generateUniqueAccountNumber() {
+        String accountNumber;
+        int attempts = 0;
+        final int MAX_ATTEMPTS = 10;
 
-            String upiInfo = account.getUpiId() != null ?
-                    "<li><strong>UPI ID:</strong> " + account.getUpiId() + "</li>" :
-                    "<li><strong>UPI ID:</strong> Not configured yet</li>";
+        do {
+            accountNumber = accountNumberGenerator.generateAccountNumber();
+            attempts++;
 
-            Context context = new Context();
-            context.setVariable("accountHolderName", account.getAccountHolderName());
-            context.setVariable("maskedAccountNumber", maskedAccountNumber);
-            context.setVariable("upiInfo", upiInfo);
+            if (attempts >= MAX_ATTEMPTS) {
+                throw new RuntimeException("Unable to generate unique account number after " + MAX_ATTEMPTS + " attempts");
+            }
+        } while (accountRepository.existsByAccountNumber(accountNumber));
 
-            emailService.sendHtmlEmail(userEmail,
-                    "Welcome to Our Payment System",
-                    "welcome-email-template",
-                    context
-            );
-        } catch (Exception e) {
-            System.err.println("Failed to send HTML email: " + e.getMessage());
+        return accountNumber;
+    }
+
+    private String maskAccountNumber(String accountNumber) {
+        if (accountNumber == null || accountNumber.length() < 8) {
+            return accountNumber;
         }
+        return "****" + accountNumber.substring(accountNumber.length() - 4);
+    }
+
+    private String maskCardNumber(String cardNumber) {
+        if (cardNumber == null || cardNumber.length() < 16) {
+            return cardNumber;
+        }
+        return "**** **** **** " + cardNumber.substring(cardNumber.length() - 4);
     }
 
     @Override
@@ -128,6 +145,20 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountInfoDto getAccountByAccountNumber(String accountNumber) {
         Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new AccountNotFoundException("Account not found"));
+        return AccountMapper.AccountToAccountInfoDto(account);
+    }
+
+    @Override
+    public AccountInfoDto getAccountByPhoneNumber(String phoneNumber) {
+        Account account = accountRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new AccountNotFoundException("Account not found"));
+        return AccountMapper.AccountToAccountInfoDto(account);
+    }
+
+    @Override
+    public AccountInfoDto getAccountByUpiId(String upiId) {
+        Account account = accountRepository.findByUpiId(upiId)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found"));
         return AccountMapper.AccountToAccountInfoDto(account);
     }

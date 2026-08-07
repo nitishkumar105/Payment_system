@@ -1,16 +1,17 @@
 package co.Nitish.paymentSystem.dto;
 
+import lombok.Data;
+import java.time.LocalDateTime;
 
-import lombok.*;
-
-@Data@NoArgsConstructor@AllArgsConstructor@Getter@Setter
+@Data
 public class AccountInfoDto {
      private String accountHolderName;
-     private String upiId;
-     private String cardNumber;
      private String accountNumber;
-     private double amount;
-
-     public AccountInfoDto(String accountHolderName, String accountNumber, String upiId, String cardNumber, double balance, Object o) {
-     }
+     private double balance;
+     private String phoneNumber;
+     private String email;
+     private String upiId;
+     private String cardNumber;  // Masked
+     private String cardExpiry;
+     private LocalDateTime createdAt;
 }
